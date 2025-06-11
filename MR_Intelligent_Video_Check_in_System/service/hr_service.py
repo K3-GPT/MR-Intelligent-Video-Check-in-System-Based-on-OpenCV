@@ -215,6 +215,12 @@ def get_day_report(date):
     print("早退名单：" + early_name)
 
 
+def is_within_time_range(start_time, end_time, current_time):
+    # 将时间字符串转换为datetime对象
+    start = datetime.strptime(start_time, "%H:%M:%S")
+    end = datetime.strptime(end_time, "%H:%M:%S")
+    now = datetime.strptime(current_time, "%H:%M:%S")
+    return start <= now <= end
 # 创建上个月打卡记录月报
 def get_pre_month_report():
     today = datetime.date.today()  # 得到今天的日期

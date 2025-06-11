@@ -48,24 +48,6 @@ def login():
     print("输入错误次数过多，已退出登录界面！")  # 超过3次尝试后提示并退出
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # 员工管理
 def employee_management():
     menu = """+-------------------------------------------------+
@@ -285,7 +267,7 @@ def change_admin_password():
         return
 
     # 2. 输入新账号新密码
-    new_user = input("请输入新的管理员账号：").strip()
+    new_user = input("请输入新的管理员账号(只改密码请输入原账号)：").strip()
     new_pass = input("请输入新的管理员密码：").strip()
     confirm_pass = input("请再次输入新的管理员密码：").strip()
 
@@ -295,7 +277,8 @@ def change_admin_password():
         return
 
     # 4. 更新管理员信息
-    if hr.update_admin(new_user, new_pass):
+    # if hr.update_admin(new_user, new_pass):
+    if hr.update_admin(new_user,new_pass):
         print("管理员账号密码修改成功！")
     else:
         print("修改失败，请检查系统状态")

@@ -213,7 +213,7 @@ def update_admin_ui():
     update_window.title("更新管理员账号")
     update_window.geometry("300x150")
 
-    tk.Label(update_window, text="新管理员账号：").pack()
+    tk.Label(update_window, text="新管理员账号(只改密码请输入原账号)：").pack()
     new_username_entry = tk.Entry(update_window)
     new_username_entry.pack()
 
