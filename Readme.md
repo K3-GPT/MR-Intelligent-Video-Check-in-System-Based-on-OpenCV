@@ -38,7 +38,8 @@ pip install -r requirements.txt
 ### 2. 运行程序
 
 ```bash
-python main.py
+python main.py  #运行控制台版本
+python UI.py  #运行 UI 版本
 ```
 
 ### 3. 功能说明
