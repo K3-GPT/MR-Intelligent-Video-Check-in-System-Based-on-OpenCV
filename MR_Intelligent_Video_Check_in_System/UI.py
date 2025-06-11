@@ -1,3 +1,6 @@
+# UI 程序主入口
+# 提供图形用户界面（GUI），实现打卡、员工管理、报表查看等功能。
+
 import tkinter as tk
 from tkinter import messagebox, simpledialog
 

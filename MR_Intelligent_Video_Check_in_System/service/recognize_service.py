@@ -1,5 +1,6 @@
 """
 人脸识别服务
+提供人脸识别相关的服务，包括训练识别器、识别图像中的人脸等。
 """
 
 import cv2
@@ -15,7 +16,8 @@ PASS_CONF = 45  # 最高评分，LBPH最高建议用45，特征脸最高建议�
 base_dir = os.path.dirname(os.path.abspath(__file__))  # 获取当前脚本所在路径
 # cascade_path = os.path.join(base_dir, "cascades", "haarcascade_frontalface_default.xml")
 
-cascade_path = r"D:\haarcascade_frontalface_default.xml"
+# cascade_path = r"D\haarcascade_frontalface_default.xml"
+cascade_path = "./cascades/haarcascade_frontalface_default.xml"
 # cascade_path = (r"D:\Python Files\Personal projects\OpenCV\MR智能视频打卡系统\service\cascades\haarcascade_frontalface_default.xml")
 FACE_CASCADE = cv2.CascadeClassifier(cascade_path)
 

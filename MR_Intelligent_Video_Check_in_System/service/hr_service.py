@@ -1,5 +1,7 @@
 """
+重要！
 人事管理服务
+提供人事管理相关的服务，包括员工管理、打卡记录管理、报表生成等。
 """
 
 from entity import organizations as o

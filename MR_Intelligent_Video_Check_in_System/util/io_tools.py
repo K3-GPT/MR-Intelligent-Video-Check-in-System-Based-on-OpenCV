@@ -1,3 +1,4 @@
+# 提供数据处理接口，输入输出相关工具函数，用于文件操作，数据加载和保存等
 from service import hr_service as hr
 from entity import organizations as o
 from service import recognize_service as rs
