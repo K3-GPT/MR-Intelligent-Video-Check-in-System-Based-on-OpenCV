@@ -38,3 +38,4 @@ def recognise_face(photo):
 def found_face(gray_img):
     faces = FACE_CASCADE.detectMultiScale(gray_img, 1.15, 4)  # 找出图像中所有的人脸
     return len(faces) > 0  # 返回人脸数量大于0的结果
+

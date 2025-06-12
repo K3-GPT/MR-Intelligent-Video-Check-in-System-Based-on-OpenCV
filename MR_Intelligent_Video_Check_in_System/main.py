@@ -1,18 +1,61 @@
 """
 程序主入口
 提供人脸识别相关的服务，包括训练识别器、识别图像中的人脸等。
+
+系统运行顺序：
+如需成功打卡，需要先进入 ③员工管理 层下 ①录入新员工 录入成功后，才可在首页进行打卡
+管理员密码请看 /data/user_password.txt的内容 {'mr': 'mrsoft', 'a': 's'} 账号为 a,密码为 s
+操作步骤：
+3 --- 1 --- (输入员工名字) --- (摄像头打开后)按三次enter键 (注①)--- "录入成功" --- 3 --- 1  #打卡完成
+
+注①:如果弹出的摄像头在后台，就把窗口点出前台，按3次回车，如果没有反应
+    把编译器窗口拖动至屏幕右边，窗口放在左边，点击窗口，再点击控制台，再点击窗口(玄学点击，反正要摄像头窗口在前台)
+    见下方图片
 """
 
+# 首先第一步导包，这里使用到了 util 文件夹下的 camera 和 public_tools 并改名为tool
+# 以及service 文件下的 hr_service并改名为 hr(改名都是为了方便调包时的高可读性)
 from util import camera
 from util import public_tools as tool
 from service import hr_service as hr
 
+# 全局变量，默认管理员没有登录，保护数据安全
 ADMIN_LOGIN = False  # 管理员登录状态
-
 
 # 管理员登录
 '''
-#原
+实现:管理员登录三次限制
+超过3次限制则退出系统，可添加退出系统锁定等功能
+同时，在后续系统选项中，除 "打卡" 外的所有功能都需登录管理员账号
+登录后，则变为管理员身份，可以实现所有功能
+ ①打卡  ②查看记录  ③员工管理  ④考勤报表  ⑤退出
+ ⑥管理员密码修改
+'''
+
+
+def login():
+    global ADMIN_LOGIN  # 用global声明全局变量(在函数中，无法调用函数外的参数，需要用global声明)
+    attempt_count = 0  # 初始化尝试次数计数器
+
+    while attempt_count < 3:  # 限制最多尝试3次
+        username = input("请输入管理员账号(输入0取消操作)：")
+        if username == "0":  # 如果只输入0
+            return  # 结束方法
+        password = input("请输入管理员密码：")
+        if hr.valid_user(username.strip(), password.strip()):  # 校验账号密码
+            ADMIN_LOGIN = True  # 设置为管理员已登录状态
+            print(username + "登录成功！请选择重新选择功能菜单")
+            return  # 登录成功，退出登录函数
+        else:
+            print(f"账号或密码错误，请重新输入！(还有{3 - attempt_count}次机会)")
+            print("---------------------------")
+            attempt_count += 1  # 尝试次数加1
+
+    print("输入错误次数过多，已退出登录界面！")  # 超过3次尝试后提示并退出
+
+
+'''
+#原代码
 def login():
     while True:
         username = input("请输入管理员账号(输入0取消操作)：")
@@ -28,28 +71,17 @@ def login():
             print("账号或密码错误，请重新输入！")
             print("---------------------------")
 '''
-def login():
-    global ADMIN_LOGIN  # 读取全局变量
-    attempt_count = 0  # 初始化尝试次数计数器
-
-    while attempt_count < 3:  # 限制最多尝试3次
-        username = input("请输入管理员账号(输入0取消操作)：")
-        if username == "0":  # 如果只输入0
-            return  # 结束方法
-        password = input("请输入管理员密码：")
-        if hr.valid_user(username.strip(), password.strip()):  # 校验账号密码
-            ADMIN_LOGIN = True  # 设置为管理员已登录状态
-            print(username + "登录成功！请选择重新选择功能菜单")
-            return  # 登录成功，退出登录函数
-        else:
-            print(f"账号或密码错误，请重新输入！(还有{3-attempt_count}次机会)")
-            print("---------------------------")
-            attempt_count += 1  # 尝试次数加1
-
-    print("输入错误次数过多，已退出登录界面！")  # 超过3次尝试后提示并退出
-
 
 # 员工管理
+'''
+此功能需登录管理员账号后才能进入
+
+录入新员工 在上方 "系统运行程序" 已详解，不赘述
+删除员工: 输入员工前编号对应员工，输入随机生成的验证码( [] 中的四位数字即是验证码)，完成删除。
+操作步骤： 3 --- a s(管理员账号密码)  --- 3 --- 2 --- 5(员工编号) --- 4432(随机验证码) --> 删除员工
+'''
+
+
 def employee_management():
     menu = """+-------------------------------------------------+
 |                员工管理功能菜单                 |
@@ -89,6 +121,14 @@ def employee_management():
 
 
 # 查看记录
+'''
+此功能仅简单调用 hr 中的 get_employee_report() 和 get_record_all() 函数
+同时在 hr 中 调用 o.EMPLOYEES ,使用organizations中的 class Employee 员工类,
+并使用 tool 中的 save_employee_all() 函数,
+用于打开文件 /data/employee_data.txt 或 /data/lock_record.txt (员工列表/员工打卡记录)
+'''
+
+
 def check_record():
     menu = """+-------------------------------------------------+
 |                 查看记录功能菜单                |
@@ -110,43 +150,7 @@ def check_record():
 
 
 # 报表设置
-'''
-#原
-def report_config():
-    menu = """+-------------------------------------------------+
-|                报表设置功能菜单                 |
-+-------------------------------------------------+
-①作息时间设置  ②返回上级菜单
----------------------------------------------------"""
-    while True:
-        print(menu)  # 打印菜单
-        option = input("请输入菜单序号：")
-        if option == "1":  # 如果选择“作息时间设置”
-            cont_online = 0
-            cont_offline = 0
-            while cont_online < 3:
-                work_time = input("请设置上班时间，格式为(08:00:00)：")
-                if tool.valid_time(work_time):  # 如果时间格式正确
-                    break  # 结束循环
-                else:  # 如果时间格式不对
-                    print("上班时间格式错误，请重新输入")
-                    cont_online += 1
-            print("输入错误次数过多，已退出菜单！")
-            while cont_offline  < 3:
-                close_time = input("请设置下班时间，格式为(23:59:59)：")
-                if tool.valid_time(close_time):  # 如果时间格式正确
-                    break
-                else:  # 如果时间格式不对
-                    print("下班时间格式错误，请重新输入")
-                    cont_offline += 1
-            print("输入错误次数过多，已退出菜单！")
-            hr.save_work_time(work_time, close_time)  # 保存用户设置的上班时间和下班时间
-            print("设置完成，上班时间：" + work_time + ",下班时间为：" + close_time)
-        elif option == "2":  # 如果选择“返回上级菜单”
-            return  # 退出查看记录功能菜单
-        else:
-            print("输入的指令有误，请重新输入！")
-'''
+# 这里各种调用,有注释不赘述
 def report_config():
     menu = """+-------------------------------------------------+
 |                报表设置功能菜单                 |
@@ -198,14 +202,55 @@ def report_config():
 
             # 保存设置的时间
             hr.save_work_time(work_time, close_time)  # 保存用户设置的上班时间和下班时间
+            # work_time 和 close_time是局部变量，作用域仅限于 report_config(),所以黄线警告无所谓
+
             print("设置完成，上班时间：" + work_time + ",下班时间为：" + close_time)
         elif option == "2":  # 如果选择“返回上级菜单”
             return  # 退出查看记录功能菜单
         else:
             print("输入的指令有误，请重新输入！")
 
+'''
+#原
+def report_config():
+    menu = """+-------------------------------------------------+
+|                报表设置功能菜单                 |
++-------------------------------------------------+
+①作息时间设置  ②返回上级菜单
+---------------------------------------------------"""
+    while True:
+        print(menu)  # 打印菜单
+        option = input("请输入菜单序号：")
+        if option == "1":  # 如果选择“作息时间设置”
+            cont_online = 0
+            cont_offline = 0
+            while cont_online < 3:
+                work_time = input("请设置上班时间，格式为(08:00:00)：")
+                if tool.valid_time(work_time):  # 如果时间格式正确
+                    break  # 结束循环
+                else:  # 如果时间格式不对
+                    print("上班时间格式错误，请重新输入")
+                    cont_online += 1
+            print("输入错误次数过多，已退出菜单！")
+            while cont_offline  < 3:
+                close_time = input("请设置下班时间，格式为(23:59:59)：")
+                if tool.valid_time(close_time):  # 如果时间格式正确
+                    break
+                else:  # 如果时间格式不对
+                    print("下班时间格式错误，请重新输入")
+                    cont_offline += 1
+            print("输入错误次数过多，已退出菜单！")
+            hr.save_work_time(work_time, close_time)  # 保存用户设置的上班时间和下班时间
+            print("设置完成，上班时间：" + work_time + ",下班时间为：" + close_time)
+        elif option == "2":  # 如果选择“返回上级菜单”
+            return  # 退出查看记录功能菜单
+        else:
+            print("输入的指令有误，请重新输入！")
+'''
+
 
 # 考勤报表
+# 同上
 def check_report():
     menu = """+-------------------------------------------------+
 |                考勤报表功能菜单                 |
@@ -246,6 +291,7 @@ def check_report():
 
 
 # 人脸打卡
+# 调用 /data/camera 的 clock_in() 方法
 def face_clock():
     print("请正面对准摄像头进行打卡")
     name = camera.clock_in()  # 开启摄像头，返回打卡员工名称
@@ -253,15 +299,25 @@ def face_clock():
         hr.add_lock_record(name)  # 保存打卡记录
         print(name + " 打卡成功！")
 
+
 # 管理员密码修改
+'''
+用 strip()方法去除输入的多余空格，确保输入的账号和密码干净,
+调用 /servers/hr 的valid_user() 方法验证用户输入的旧账号和密码是否正确
+同时，在 hr 中使用 o.USERS 读取 /entity/organizations  中 当前管理员的账号密码
+'''
+
+
 def change_admin_password():
     print("+--------------------------------------------------+")
     print("|              管理员密码修改界面                  |")
     print("+--------------------------------------------------+")
 
     # 1. 输入旧账号密码
+    # 使用 strip()方法去除输入的多余空格，确保输入的账号和密码干净
     old_user = input("请输入当前管理员账号：").strip()
     old_pass = input("请输入当前管理员密码：").strip()
+
 
     if not hr.valid_user(old_user, old_pass):
         print("账号或密码错误，无法修改")
@@ -279,13 +335,19 @@ def change_admin_password():
 
     # 4. 更新管理员信息
     # if hr.update_admin(new_user, new_pass):
-    if hr.update_admin(new_user,new_pass):
+    if hr.update_admin(new_user, new_pass):
         print("管理员账号密码修改成功！")
     else:
         print("修改失败，请检查系统状态")
 
 
 # 启动方法
+'''
+除 "打卡" 外的所有功能都需登录管理员账号
+登录后，则变为管理员身份，可以实现所有功能
+'''
+
+
 def start():
     finish = False  # 程序结束标志
     menu = """

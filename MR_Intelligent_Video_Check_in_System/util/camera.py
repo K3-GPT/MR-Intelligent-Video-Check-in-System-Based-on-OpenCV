@@ -1,5 +1,6 @@
 """
 摄像头工具
+只要正确导包了，此文件几乎不会改动
 """
 
 import cv2
@@ -56,3 +57,4 @@ def clock_in():
         success, frame = cameraCapture.read()  # 再读一帧
     cv2.destroyAllWindows()  # 释放所有窗体
     cameraCapture.release()  # 释放摄像头
+

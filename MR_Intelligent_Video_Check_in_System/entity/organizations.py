@@ -42,3 +42,4 @@ def get_new_id():
     global MAX_ID  # 调用全局变量
     MAX_ID += 1  # 当前最大的ID + 1
     return MAX_ID
+
